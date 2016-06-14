@@ -15,7 +15,8 @@ gem 'async_sinatra'
 gem 'activesupport'
 gem 'addressable'
 gem 'rake'
-
+gem 'lru_redux'
+gem 'timecop'
 group :development, :test do
   gem 'foreman'
   gem 'rerun'

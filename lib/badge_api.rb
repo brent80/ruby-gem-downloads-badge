@@ -109,9 +109,13 @@ class BadgeApi < CoreApi
   #
   # @return [void]
   def fetch_image_shield
-    fetch_data(build_badge_url, 'request_name' => @params.fetch('request_name', nil)) do |http_response|
-      print_to_output_buffer(http_response, @output_buffer)
-    end
+    output = cached_badges.getset(build_badge_url) {
+      fetch_data(build_badge_url, 'request_name' => @params.fetch('request_name', nil), :buffer => @output_buffer) do |http_response|
+        cached_badges[build_badge_url]= http_response
+      end
+    }
+    raise output.inspect
+    print_to_output_buffer(output, @output_buffer)
   end
 
   # Method that is used for formatting the number of downloads , if the number is blank, will return invalid,

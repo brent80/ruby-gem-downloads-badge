@@ -16,6 +16,8 @@ require 'versionomy'
 require 'active_support/all'
 require 'addressable/uri'
 
+require 'lru_redux'
+require 'timecop'
 
 Dir.glob('./config/initializers/**/*.rb') { |file| require file }
 Dir.glob('./lib**/*.rb') { |file| require file }
@@ -30,6 +32,22 @@ class RubygemsDownloadShieldsApp < Sinatra::Base
   helpers Sinatra::Streaming
   register Sinatra::Async
 
+  def self.new_cache
+    @new_cache = LruRedux::TTL::ThreadSafeCache.new(100, 5 * 60)
+    set_time_zone
+    Timecop.freeze(Time.now)
+    @new_cache
+  end
+  def self.cookie_hash(url)
+    CookieHash.new.tap { |hsh|
+      settings.request_cookies[url].uniq.each { |c| hsh.add_cookies(c) }
+    }
+  end
+
+  def self.set_time_zone
+    Time.zone = 'UTC'
+    ENV['TZ'] = 'UTC'
+  end
 
   set :root, File.dirname(File.dirname(__FILE__)) # You must set app root
   enable :logging
@@ -45,17 +63,8 @@ class RubygemsDownloadShieldsApp < Sinatra::Base
   set :public_folder, File.join(settings.root, 'static') # set up the static dir (with images/js/css inside)
   set :views, File.join(settings.root, 'views') # set up the views dir
   set :request_cookies, (Thread.current[:request_cookies] ||= {})
+  set :cached_badges, (Thread.current[:cached_badges] ||= new_cache)
 
-  def self.cookie_hash(url)
-    CookieHash.new.tap { |hsh|
-      settings.request_cookies[url].uniq.each { |c| hsh.add_cookies(c) }
-    }
-  end
-
-  def self.set_time_zone
-    Time.zone = 'UTC'
-    ENV['TZ'] = 'UTC'
-  end
 
   ::Logger.class_eval do
     alias_method :write, :<<
@@ -120,7 +129,7 @@ class RubygemsDownloadShieldsApp < Sinatra::Base
   # @param [Block] block The block that is executed after stream is open
   # @return [void]
   def use_stream(&block)
-    set_content_type
+    #set_content_type
     stream :keep_open do |out|
       block.call(out)
     end
