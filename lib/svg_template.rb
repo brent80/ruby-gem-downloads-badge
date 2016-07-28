@@ -12,16 +12,23 @@ class SvgTemplate
     @badge = badge
   end
 
+  def svg_color_number
+    @svg_color ||= fetch_color_hex(image_colour)
+    @svg_color
+  end
+
   def image_width
     status_param_width + formatted_downloads_width
   end
 
   def status_param_width
-    measure_text(status_param) + 10 + logo_width + logo_padding
+    @status_param_width ||= measure_text(status_param) + 10 + logo_width + logo_padding
+    @status_param_width
   end
 
   def formatted_downloads_width
-    measure_text(format_number_of_downloads) + 10
+    @formatted_downloads_width ||= measure_text(format_number_of_downloads) + 10
+    @formatted_downloads_width
   end
 
   def measure_text(string)
