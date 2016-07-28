@@ -1,7 +1,6 @@
 require_relative './helper'
 class SvgTemplate
   include Helper
-  include Magick
 
   attr_reader :badge
 
