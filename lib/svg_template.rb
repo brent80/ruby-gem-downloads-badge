@@ -17,11 +17,11 @@ class SvgTemplate
   end
 
   def status_param_width
-    measure_text(status_param)
+    measure_text(status_param) + 10 + logo_width + logo_padding
   end
 
   def formatted_downloads_width
-     measure_text(format_number_of_downloads)
+    measure_text(format_number_of_downloads) + 10
   end
 
   def measure_text(string)
@@ -32,7 +32,11 @@ class SvgTemplate
     }
     document.font('Verdana')
     document_font_metrics = Prawn::FontMetricCache.new(document)
-    document_font_metrics.width_of(string, :size => 12)
+    width = document_font_metrics.width_of(string, :size => 12)
+    width = width.blank? ? 0 : width.to_i
+    # Increase chances of pixel grid alignment.
+    width=width+1 if (width % 2 === 0)
+    width
   end
 
   def default_template
