@@ -31,6 +31,14 @@ class SvgTemplate
     @formatted_downloads_width
   end
 
+  def status_param_and_logo_width_text
+    (status_param_width + logo_width+ logo_padding)/2
+  end
+
+  def formatted_download_text_width
+    (status_param_width + formatted_downloads_width/2 -1)
+  end
+
   def measure_text(string)
     string = string.is_a?(String) ? string : string.to_s
     document = Prawn::Document.new(:page_size => "A4", :page_layout => :landscape)
