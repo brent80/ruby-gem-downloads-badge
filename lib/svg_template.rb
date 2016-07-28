@@ -13,7 +13,15 @@ class SvgTemplate
   end
 
   def image_width
-    measure_text(status_param) + measure_text(format_number_of_downloads)
+    status_param_width + formatted_downloads_width
+  end
+
+  def status_param_width
+    measure_text(status_param)
+  end
+
+  def formatted_downloads_width
+     measure_text(format_number_of_downloads)
   end
 
   def measure_text(string)
