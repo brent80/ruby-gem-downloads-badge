@@ -18,9 +18,13 @@ class SvgTemplate
 
   def measure_text(string)
     string = string.is_a?(String) ? string : string.to_s
-    pdf = PDF::Writer.new(:paper => "A4", :orientation => :landscape)
-    pdf.select_font("Verdana")
-    pdf.text_width(string, :font_size => 12)
+    document = Prawn::Document.new(:page_size => "A4", :page_layout => :landscape)
+    document.font_families["Verdana"] = {
+      :normal => { :file => File.join(root, "fonts", "Verdana.ttf"), :font => "Verdana" }
+    }
+    document.font('Verdana')
+    document_font_metrics = Prawn::FontMetricCache.new(document)
+    document_font_metrics.width_of(string, :size => 12)
   end
 
   def default_template
