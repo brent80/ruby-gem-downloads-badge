@@ -47,7 +47,8 @@ class SvgTemplate
   end
 
   def default_template
-    @default_template ||= File.expand_path(File.join(root, 'templates', "svg_default.erb"))
+    badge_style = style_param.present? ? style_param : 'flat'
+    @default_template ||= File.expand_path(File.join(root, 'templates', "svg_#{badge_style}.erb"))
   end
 
   def template_data
