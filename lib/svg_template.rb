@@ -1,6 +1,7 @@
 require_relative './helper'
 class SvgTemplate
   include Helper
+  include Magick
 
   attr_reader :badge
 
@@ -13,23 +14,15 @@ class SvgTemplate
   end
 
   def image_width
-    status_param.size + format_number_of_downloads.size
+    measure_text(status_param) + measure_text(format_number_of_downloads)
   end
 
-  def measure_text
-    body = %{
-        <html>
-          <head>
-            <meta name="pdfkit-page_size" content="Legal"/>
-            <meta name="pdfkit-orientation" content="Landscape"/>
-          </head>
-        </html>
-      }
-    pdfkit = PDFKit.new(body, page_size: 'A4', :toc_l1_font_size => 12)
+  def measure_text(string)
+    string = string.is_a?(String) ? string : string.to_s
+    pdf = PDF::Writer.new(:paper => "A4", :orientation => :landscape)
+    pdf.select_font("Verdana")
+    pdf.text_width(string, :font_size => 12)
   end
-
-
-
 
   def default_template
     @default_template ||= File.expand_path(File.join(root, 'templates', "svg_default.erb"))
