@@ -32,7 +32,7 @@ class SvgTemplate
     }
     document.font('Verdana')
     document_font_metrics = Prawn::FontMetricCache.new(document)
-    width = document_font_metrics.width_of(string, :size => 12)
+    width = document_font_metrics.width_of(string, :size => 11)
     width = width.blank? ? 0 : width.to_i
     # Increase chances of pixel grid alignment.
     width=width+1 if (width % 2 === 0)
