@@ -5,11 +5,19 @@ class SvgTemplate
   attr_reader :badge
 
   delegate :status_param,
-            :format_number_of_downloads,
+  :format_number_of_downloads,
+  :logo_width,
+  :logo_padding,
+  :logo_param,
+  :image_colour,
+  :style_param,
   to: :badge
 
   def initialize(badge)
     @badge = badge
+    @svg_logo_width = logo_width.present? ? logo_width : (logo_param.present? ? 14 : 0)
+    @svg_logo_padding = logo_param.present? ? 3: 0
+    @svg_social_links = style_param != 'social' || link_param.blank? ? [] : link_param
   end
 
   def svg_color_number
@@ -22,7 +30,7 @@ class SvgTemplate
   end
 
   def status_param_width
-    @status_param_width ||= measure_text(status_param) + 10 + logo_width + logo_padding
+    @status_param_width ||= measure_text(status_param) + 10 + @svg_logo_width + @svg_logo_padding
     @status_param_width
   end
 
@@ -32,7 +40,7 @@ class SvgTemplate
   end
 
   def status_param_and_logo_width_text
-    (status_param_width + logo_width+ logo_padding)/2
+    (status_param_width + @svg_logo_width+ @svg_logo_padding)/2
   end
 
   def formatted_download_text_width
@@ -46,12 +54,21 @@ class SvgTemplate
       :normal => { :file => File.join(root, "fonts", "Verdana.ttf"), :font => "Verdana" }
     }
     document.font('Verdana')
-    document_font_metrics = Prawn::FontMetricCache.new(document)
-    width = document_font_metrics.width_of(string, :size => 11)
+    #document_font_metrics = Prawn::FontMetricCache.new(document)
+    width = document.width_of(string, :size => 11)
     width = width.blank? ? 0 : width.to_i
     # Increase chances of pixel grid alignment.
     width=width+1 if (width % 2 === 0)
     width
+  end
+
+  def fetch_badge_image
+    case image_extension
+    when 'png'
+      create_png
+    else
+      create_svg
+    end
   end
 
   def default_template
@@ -59,12 +76,12 @@ class SvgTemplate
     @default_template ||= File.expand_path(File.join(root, 'templates', "svg_#{badge_style}.erb"))
   end
 
-  def template_data
+  def create_svg
     Tilt.new(default_template).render(self)
   end
 
   def create_png
-    ImageConvert.svg_to_png(template_data)
+    ImageConvert.svg_to_png(create_svg)
   end
 
   def method_missing(sym, *args, &block)
